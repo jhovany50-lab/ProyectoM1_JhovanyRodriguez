@@ -1,0 +1,3 @@
+1- Codigo fuente del proyecto
+    ->repositorio del github
+        - nombre del repositorio: ProyectoMi_JhovanyRodriguez
