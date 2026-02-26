@@ -23,8 +23,8 @@
 
       <label for="format">Formato:</label>
       <select id="format">
+        <option value="hsl">HSL</option>
         <option value="hex">HEX</option>
-        <option value="rgba">RGBA</option>
       </select>
 
       <button id="generateBtn">Generar Paleta</button>
@@ -33,7 +33,9 @@
     <section id="palette" class="palette"></section>
   </main>
 
-    <script src="script.js"></script>
-  
+  <div id="globalTooltip" class="global-tooltip"></div>
+
+  <script src="script.js" defer></script>
+
 </body>
 </html>

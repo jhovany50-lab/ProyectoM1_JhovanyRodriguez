@@ -2,48 +2,41 @@ const generateBtn = document.getElementById("generateBtn");
 const palette = document.getElementById("palette");
 const sizeSelect = document.getElementById("size");
 const formatSelect = document.getElementById("format");
+const globalTooltip = document.getElementById("globalTooltip");
 
-// ==========================
-// GENERAR HEX
-// ==========================
 function generateRandomHEX() {
   const letters = "0123456789ABCDEF";
   let color = "#";
-
   for (let i = 0; i < 6; i++) {
     color += letters[Math.floor(Math.random() * 16)];
   }
-
   return color;
 }
 
-// ==========================
-// GENERAR HSL
-// ==========================
 function generateRandomHSL() {
   const h = Math.floor(Math.random() * 360);
   const s = Math.floor(Math.random() * 100);
   const l = Math.floor(Math.random() * 100);
-
   return `hsl(${h}, ${s}%, ${l}%)`;
 }
 
-// ==========================
-// GENERAR RGBA
-// ==========================
-function generateRandomRGBA() {
-  const r = Math.floor(Math.random() * 256);
-  const g = Math.floor(Math.random() * 256);
-  const b = Math.floor(Math.random() * 256);
-  const a = Math.random().toFixed(2);
-
-  return `rgba(${r}, ${g}, ${b}, ${a})`;
+function getContrastColor(hslString) {
+  const match = hslString.match(/hsl\(\d+,\s*\d+%,\s*(\d+)%\)/);
+  if (!match) return "white";
+  const lightness = parseInt(match[1]);
+  return lightness > 60 ? "black" : "white";
 }
 
-// ==========================
-// EVENTO PRINCIPAL
-// ==========================
+function showGlobalTooltip(message) {
+  globalTooltip.textContent = message;
+  globalTooltip.classList.add("show");
+  setTimeout(() => {
+    globalTooltip.classList.remove("show");
+  }, 1500);
+}
+
 generateBtn.addEventListener("click", () => {
+  showGlobalTooltip("Paleta generada correctamente");
 
   const size = parseInt(sizeSelect.value);
   const selectedFormat = formatSelect.value;
@@ -51,54 +44,49 @@ generateBtn.addEventListener("click", () => {
   palette.innerHTML = "";
 
   for (let i = 0; i < size; i++) {
-
     const hslColor = generateRandomHSL();
-    let finalColor;
-
-    if (selectedFormat === "hex") {
-      finalColor = generateRandomHEX();
-    } else {
-      finalColor = generateRandomRGBA();
-    }
+    const hexColor = generateRandomHEX();
 
     const colorBox = document.createElement("div");
     colorBox.classList.add("color-box");
 
     colorBox.style.backgroundColor = hslColor;
+    colorBox.style.color = getContrastColor(hslColor);
 
     colorBox.innerHTML = `
       <span class="tooltip">Haz clic para copiar</span>
-      <p>${hslColor}</p>
-      <p>${finalColor}</p>
+      <p class="${selectedFormat === "hsl" ? "highlight" : ""}">
+        ${hslColor}
+      </p>
+      <p class="${selectedFormat === "hex" ? "highlight" : ""}">
+        ${hexColor}
+      </p>
     `;
 
-    // ==========================
-    // TOOLTIP DINÁMICO
-    // ==========================
     colorBox.addEventListener("click", () => {
+      const currentFormat = formatSelect.value;
+      const colorToCopy = currentFormat === "hsl" ? hslColor : hexColor;
+
+      navigator.clipboard.writeText(colorToCopy);
 
       const tooltip = colorBox.querySelector(".tooltip");
-
-      try {
-        navigator.clipboard.writeText(finalColor);
-      } catch {
-        const tempInput = document.createElement("textarea");
-        tempInput.value = finalColor;
-        document.body.appendChild(tempInput);
-        tempInput.select();
-        document.execCommand("copy");
-        document.body.removeChild(tempInput);
-      }
-
       tooltip.textContent = "¡Copiado!";
 
       setTimeout(() => {
         tooltip.textContent = "Haz clic para copiar";
       }, 1500);
-
     });
 
     palette.appendChild(colorBox);
   }
+});
 
+sizeSelect.addEventListener("change", () => {
+  sizeSelect.classList.add("active");
+  showGlobalTooltip("Tamaño seleccionado correctamente");
+});
+
+formatSelect.addEventListener("change", () => {
+  formatSelect.classList.add("active");
+  showGlobalTooltip("Formato seleccionado correctamente");
 });
